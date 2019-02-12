@@ -8,21 +8,27 @@
 import requests
 import json
 import argparse as ap
+import os
+# For ASCII art to work, please install the program 'pokemon'
+# with 'pip install pokemon' in your terminal of choice.
 
 parser = ap.ArgumentParser("\nWelcome to the Pokedex!\n"
                            "\nWith the Pokedex, you can search through \n"
                            "a vast collection of Pokemon-related information!\n")
 
-parser.add_argument('-n', '--name', action="store", help="Specify the name of the Pokemon.")
-parser.add_argument('-t', '--type', action="store", help="Specify a Pokemon type.\n")
+parser.add_argument('-n', '--name', help="Specify the name or ID (1-807) of the Pokemon. "
+                                         "Beware! ASCII art is not available for Pokemon "
+                                         "from Generation 7 (ID's from 722 - 807).")
+parser.add_argument('-t', '--type', help="Specify a Pokemon type.\n")
 args = parser.parse_args()
 
 
 def pokemon_name():
+    global args
     poke_name = requests.get('https://pokeapi.co/api/v2/pokemon/' + args.name)
-    poke_flavor = requests.get('https://pokeapi.co/api/v2/pokemon-species/' + args.name)
+    poke_species = requests.get('https://pokeapi.co/api/v2/pokemon-species/' + args.name)
     json_name = json.loads(poke_name.content)
-    json_flavor = json.loads(poke_flavor.content)
+    json_species = json.loads(poke_species.content)
 
     print('\n\nPokemon Info:\n')
     print('ID:\t', json_name['id'])
@@ -30,12 +36,28 @@ def pokemon_name():
     print('Height:\t', json_name['height'] / 10, 'meters')
     print('Weight:\t', json_name['weight'] / 10, 'kilograms')
     print()
-    print('Types:\t')
+
+    print('Category:')
+    if json_species['genera'][2]['language']['name'] == 'en':
+        print(json_species['genera'][2]['genus'])
+    else:
+        print("Unable to retrieve category.")
+    print()
+
+    print('Types:')
     for i in json_name['types']:
         print(i['type']['name'])
     print()
-    for i in json_flavor['flavor_text_entries']:
-        print(i['flavor_text_entries'][1]['flavor_text'])
+    if json_species['flavor_text_entries'][1]['language']['name'] == 'en':
+        print(json_species['flavor_text_entries'][1]['flavor_text'])
+    else:
+        print(json_species['flavor_text_entries'][2]['flavor_text'])
+    print()
+    if print(args.name) == print(json_name['id']):
+        args.name = json_name['name']
+
+    abc = os.system("pokemon --pokemon {}".format(args.name))
+    print(abc)
 
 
 def pokemon_type():
@@ -46,10 +68,23 @@ def pokemon_type():
     print('ID:\t', json_type['id'])
     print('Name:\t', json_type['name'])
     print()
+    print('Damage Relations:')
+    for i in json_type['damage_relations']:
+        print(i + ':\t')
+        for x in json_type['damage_relations'][i]:
+            print(x['name'])
+        print()
 
 
-if args.name:
-    pokemon_name()
+try:
 
-if args.type:
-    pokemon_type()
+    if args.name:
+        pokemon_name()
+
+    if args.type:
+        pokemon_type()
+
+except json.decoder.JSONDecodeError:
+    print("\nOops! Something went wrong!\n"
+          "Make sure the Pokemon name or type \n"
+          "you tried to enter was spelled correctly!")
