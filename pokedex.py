@@ -65,7 +65,7 @@ class Pokemon:
         if print(args.name) == print(json_name['id']):
             args.name = json_name['name']
 
-        print(os.system("pokemon --pokemon {}".format(args.name)))
+        os.system("pokemon --pokemon {}".format(args.name))
 
     def type(self):
         poke_type = requests.get('https://pokeapi.co/api/v2/type/' + args.type.lower())
