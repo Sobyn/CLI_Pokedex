@@ -5,6 +5,7 @@
 **Author:** Anonymous
 """
 
+from unicurses import *
 import requests
 import json
 import argparse as ap
@@ -17,22 +18,22 @@ parser = ap.ArgumentParser("\nWelcome to the Pokedex!\n"
                            "a vast collection of Pokemon-related information!\n")
 
 parser.add_argument('-n', '--name', help="Specify the name or ID (1-807) of the Pokemon. "
-                                         "Beware! ASCII art is not available for Pokemon "
-                                         "from Generation 7 (ID's from 722 - 807).")
+                                         "Beware! ASCII art is not available for "
+                                         "Generation 7 Pokemon (ID's from 722 - 807).")
 parser.add_argument('-t', '--type', help="Specify a Pokemon type.\n")
 args = parser.parse_args()
 
 
 def pokemon_name():
-    global args
-    poke_name = requests.get('https://pokeapi.co/api/v2/pokemon/' + args.name)
-    poke_species = requests.get('https://pokeapi.co/api/v2/pokemon-species/' + args.name)
+
+    poke_name = requests.get('https://pokeapi.co/api/v2/pokemon/' + args.name.lower())
+    poke_species = requests.get('https://pokeapi.co/api/v2/pokemon-species/' + args.name.lower())
     json_name = json.loads(poke_name.content)
     json_species = json.loads(poke_species.content)
 
     print('\n\nPokemon Info:\n')
     print('ID:\t', json_name['id'])
-    print('Name:\t', json_name['name'])
+    print('Name:\t', json_name['name'].capitalize())
     print('Height:\t', json_name['height'] / 10, 'meters')
     print('Weight:\t', json_name['weight'] / 10, 'kilograms')
     print()
@@ -46,33 +47,42 @@ def pokemon_name():
 
     print('Types:')
     for i in json_name['types']:
-        print(i['type']['name'])
+        print(i['type']['name'].capitalize())
     print()
+
     if json_species['flavor_text_entries'][1]['language']['name'] == 'en':
         print(json_species['flavor_text_entries'][1]['flavor_text'])
     else:
         print(json_species['flavor_text_entries'][2]['flavor_text'])
     print()
+    print(art())
+
+
+def art():
+
+    poke_name = requests.get('https://pokeapi.co/api/v2/pokemon/' + args.name.lower())
+    json_name = json.loads(poke_name.content)
+
     if print(args.name) == print(json_name['id']):
         args.name = json_name['name']
 
-    abc = os.system("pokemon --pokemon {}".format(args.name))
-    print(abc)
+    print(os.system("pokemon --pokemon {}".format(args.name)))
 
 
 def pokemon_type():
-    poke_type = requests.get('https://pokeapi.co/api/v2/type/' + args.type)
+
+    poke_type = requests.get('https://pokeapi.co/api/v2/type/' + args.type.lower())
     json_type = json.loads(poke_type.content)
 
     print('\n\nType Info:\n')
     print('ID:\t', json_type['id'])
-    print('Name:\t', json_type['name'])
+    print('Name:\t', json_type['name'].capitalize())
     print()
     print('Damage Relations:')
     for i in json_type['damage_relations']:
-        print(i + ':\t')
+        print(i.capitalize() + ':\t')
         for x in json_type['damage_relations'][i]:
-            print(x['name'])
+            print(x['name'].capitalize())
         print()
 
 
