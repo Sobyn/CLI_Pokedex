@@ -8,7 +8,7 @@
 # For ASCII art to work, please install the program 'pokemon'
 # with 'pip install pokemon' in your terminal of choice.
 
-# from unicurses import *
+from unicurses import *
 import requests
 import json
 import argparse as ap
