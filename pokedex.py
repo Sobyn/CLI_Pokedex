@@ -9,10 +9,6 @@
 # which is available at 'https://pokeapi.co'. The program is designed as a CLI program,
 # as it requires that the user specifies one of two flags to specify what they want
 # to search for.
-#
-# For ASCII art to work, please install the program 'pokemon'
-# with 'pip install pokemon' in your terminal of choice.
-
 
 # Importing the different modules required for this program to work:
 # Unicurses for the graphical representation of the program;
@@ -21,6 +17,13 @@
 # Argparse to enable the use of argument flags
 # OS.System to enable the use of terminal commands from within the program
 # Textwrap for handling text uniformly.
+#
+# For ASCII art to work, please install the program 'pokemon'
+# with 'pip install pokemon' in your terminal of choice.
+#
+# Additionally, for unicurses to work, unicurses and curses.dll has to
+# be downloaded and installed. curses.dll has to be placed in the same directory
+# as the Python executable.
 from unicurses import *
 import requests
 import json
@@ -28,29 +31,34 @@ import argparse as ap
 from os import system
 import textwrap
 
+
 # Creating a variable for the ArgumentParser, and printing a welcome message
 # that is visible upon calling '-h' when running the program.
 # Then, creating a mutually exclusive group to ensure only one or the other flag works
-# Two arguments are created; One for Pokemon names, and one for types;
+# Two arguments are created; One for Pokemon names ('-n'), and one for types ('-t');
 # Each with their own help text to display when '-h' is called.
 # A 'parse_args' variable is finally created, and will sort of work like the user's input from now on.
 parser = ap.ArgumentParser("\nWelcome to the Pokedex!\n"
                            "\nWith the Pokedex, you can search through \n"
                            "a vast collection of Pokemon-related information!\n")
+
 group = parser.add_mutually_exclusive_group()
 group.add_argument('-n', '--name', help="Specify the name or ID (1-807) of the Pokemon. "
                                         "Beware! ASCII art is not available for "
                                         "Generation 7 Pokemon (ID's from 722 - 807).")
+
 group.add_argument('-t', '--type',  help="Specify a Pokemon type.\n")
+
 args = parser.parse_args()
 
 
 # The class 'Pokemon' houses three methods; 'name', 'art' and 'type'.
 class Pokemon:
-    # The 'name' method retrieves select information about the Pokemon the user searches for
+    # The 'name' method retrieves select information about the Pokemon the user searches for.
+    # Information here includes name, type(s), flavor text and more.
     def name(self):
 
-        # The 'poke-{}' variables each retrieve information from each URL.
+        # The 'poke_{}' variables each retrieve information from each URL.
         # The URL is appended with the user's input, and converted to lower-case.
         # These two variables are, however, only temporary, as they are immediately used
         # in the 'json_loads' command to decode JSON content.
@@ -105,6 +113,7 @@ class Pokemon:
             lang = 1
         else:
             lang = 2
+
         species = json_species['flavor_text_entries'][lang]['flavor_text']
         window_text(popup, 1, 16, sizeX - rmargin - lmargin - pmargin * 2, species)
 
@@ -116,7 +125,8 @@ class Pokemon:
         window_text(background, 1, sizeY - 3, sizeX - rmargin - lmargin - pmargin * 2, ascii_art)
         window_text(background, 1, sizeY - 2, sizeX - rmargin - lmargin - pmargin * 2, exit_message)
 
-    # The 'art' method shows an ASCII art representation of the Pokemon the user searched up.
+    # The 'art' method shows an ASCII art representation of the Pokemon the user searched
+    # for in the 'name' method..
     # This is shown after the user has clicked away from the intial screen.
     def art(self):
 
@@ -136,6 +146,7 @@ class Pokemon:
         mvwaddstr(background, 2, 2, system("pokemon --pokemon {}".format(args.name)))
 
     # The 'type' method shows information about the Pokemon type the user searches for.
+    # Information here mostly comprises of damage relations with other types.
     def type(self):
         # Retrieving PokeAPI content and decoding
         poke_type = requests.get('https://pokeapi.co/api/v2/type/' + args.type.lower())
@@ -207,13 +218,14 @@ class Pokemon:
 
 
 # Most lines from here on is related to Unicurses.
+
 # This initializes the standard screen.
 stdscr = initscr()
 
 # Turns on color-support
 start_color()
 
-# Turning off characters being printed back, and getting raw key input, as well as arrow keys
+# Turning off characters being printed back, and getting raw key input as well as arrow keys
 noecho()
 cbreak()
 keypad(stdscr, True)
@@ -237,9 +249,9 @@ def make_window(y, x, startx, starty):
 def window_text(window, startx, starty, width, text):
 
     # Removing line breaks, returns and spaces
-    tekst = text.replace('\r', ' ').replace('\n', ' ').replace('  ', ' ')
+    text = text.replace('\r', ' ').replace('\n', ' ').replace('  ', ' ')
 
-    # Text wrapping
+    # Text wrapping by defining how long text can be before
     lines = textwrap.wrap(text, width)
     l = 0
     for i in lines:
