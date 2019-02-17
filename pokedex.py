@@ -10,6 +10,15 @@
 # as it requires that the user specifies one of two flags to specify what they want
 # to search for.
 
+# For ASCII art to work, please install the program 'pokemon'
+# with 'pip install pokemon' in your terminal of choice.
+#
+# Additionally, for unicurses to work, unicurses and curses.dll has to
+# be downloaded and installed. curses.dll has to be placed in the same directory
+# as the Python executable. The program is confirmed as working on both CMD and
+# Powershell, but is best experienced on CMD.
+
+
 # Importing the different modules required for this program to work:
 # Unicurses for the graphical representation of the program;
 # Requests for retrieving information from the Pokemon API
@@ -17,13 +26,6 @@
 # Argparse to enable the use of argument flags
 # OS.System to enable the use of terminal commands from within the program
 # Textwrap for handling text uniformly.
-#
-# For ASCII art to work, please install the program 'pokemon'
-# with 'pip install pokemon' in your terminal of choice.
-#
-# Additionally, for unicurses to work, unicurses and curses.dll has to
-# be downloaded and installed. curses.dll has to be placed in the same directory
-# as the Python executable.
 from unicurses import *
 import requests
 import json
@@ -121,9 +123,7 @@ class Pokemon:
         # of the 'background' set. This is specified here, because it's different from
         # the instructions for the 'type' method.
         ascii_art = "Press any key to see an image of the Pokemon."
-        exit_message = "Or press the END-key to exit the program right away."
-        window_text(background, 1, sizeY - 3, sizeX - rmargin - lmargin - pmargin * 2, ascii_art)
-        window_text(background, 1, sizeY - 2, sizeX - rmargin - lmargin - pmargin * 2, exit_message)
+        window_text(background, 1, sizeY - 2, sizeX - rmargin - lmargin - pmargin * 2, ascii_art)
 
     # The 'art' method shows an ASCII art representation of the Pokemon the user searched
     # for in the 'name' method..
@@ -225,7 +225,8 @@ stdscr = initscr()
 # Turns on color-support
 start_color()
 
-# Turning off characters being printed back, and getting raw key input as well as arrow keys
+# Turning off characters being printed back,
+# and getting raw key input as well as arrow keys
 noecho()
 cbreak()
 keypad(stdscr, True)
@@ -259,6 +260,7 @@ def window_text(window, startx, starty, width, text):
         l += 1
     return
 
+
 # Defining the maximum size of the window, as well as set coordinates for X and Y
 max_size = getmaxyx(stdscr)
 sizeX = max_size[1]
@@ -271,7 +273,7 @@ sizeY = max_size[0]
 background = make_window(sizeY, sizeX, 0, 0)
 wbkgd(background, COLOR_PAIR(2))
 box(background)  # , 0,0)
-bakgrunnPanel = new_panel(background)
+backgroundPanel = new_panel(background)
 
 # Specifying the margins in order to allow for differently sized user windows.
 # Right, left, top, bottom and padding, respectively.
@@ -297,14 +299,14 @@ try:
     if args.type:
         Pokemon.type(args.type)
 
-# Present an error message if the Pokemon name doesn't match anything
-# from the PokeAPI
+# Present an error message if the Pokemon name or type
+# doesn't match anything from the PokeAPI
 except json.decoder.JSONDecodeError:
     print("Oops! Something went wrong!"
           "Make sure the Pokemon name or type"
           "you tried to enter was spelled correctly!")
 
-# Drawing the background
+# Drawing the background and popup
 update_panels()
 doupdate()
 
@@ -315,7 +317,8 @@ i = 1
 # Allowing the use of the keypad
 keypad(background, True)
 
-# Unknown error cover-up!
+# Running the '-t' flag raised an unknown attribute error, which is
+# bypassed with this workaround try-except statement.
 try:
     # Every time a key is pressed, increment 'i' by 1
     while key != KEY_END:
@@ -340,8 +343,6 @@ try:
         if i == 3:
             break
 
-# Running the '-t' flag raised an unknown attribute error, which is
-# bypassed with this workaround.
 except AttributeError:
     pass
 
